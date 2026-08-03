@@ -118,3 +118,32 @@ st.caption(
     "null result replicates across all three seasons in this dataset, not "
     "just 2023-24."
 )
+
+st.subheader("What about turnovers?")
+st.markdown(
+    """
+Shooting touch is one way fatigue could show up — ball security is another,
+and arguably a more physically plausible one. We ran the same test on
+**turnover rate** (TOV%, turnovers per 100 plays — not raw turnovers, which
+would just track who handles the ball more, the same confound TS% had to be
+corrected for). Each player's TOV% is z-scored against their own season
+baseline, exactly like TS% was, and tested independently per season.
+"""
+)
+
+st.table(
+    {
+        "Season": ["2023-24", "2024-25", "2025-26"],
+        "r (rest vs z-TOV%)": ["-0.0013", "-0.0114", "-0.0087"],
+        "r (workload vs z-TOV%)": ["-0.0045", "-0.0012", "-0.0081"],
+        "High-load+low-rest vs. rest, p-value": ["0.57", "0.51", "0.48"],
+    }
+)
+
+st.caption(
+    "Same result as shooting efficiency: no statistically significant "
+    "rest/workload effect on turnover rate in any of the three seasons. "
+    "Both metrics tested point the same direction — at least for these "
+    "playing-time-based proxies, rest and recent workload don't show up in "
+    "shot quality or ball security."
+)
