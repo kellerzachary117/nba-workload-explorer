@@ -11,6 +11,7 @@ USECOLS = [
     "season_year", "game_date", "matchup", "teamTricode",
     "personId", "personName", "minutes",
     "fieldGoalsAttempted", "freeThrowsAttempted", "points",
+    "turnovers", "assists",
 ]
 
 
@@ -30,6 +31,16 @@ def _parse_minutes(s):
     return float(s)
 
 
+def _zscore_per_player(df: pd.DataFrame, col: str) -> pd.Series:
+    grouped = df.groupby("personId")[col]
+    player_mean = grouped.transform("mean")
+    player_std = grouped.transform(lambda s: s.std(ddof=1))
+    player_n = grouped.transform("count")
+    z = (df[col] - player_mean) / player_std
+    z[(player_n < 2) | (player_std == 0)] = None
+    return z
+
+
 @st.cache_data(show_spinner="Loading season data...")
 def load_game_log(season: str = SEASON) -> pd.DataFrame:
     frames = []
@@ -46,6 +57,9 @@ def load_game_log(season: str = SEASON) -> pd.DataFrame:
 
     denom = 2 * (df["fieldGoalsAttempted"] + 0.44 * df["freeThrowsAttempted"])
     df["ts_pct"] = (df["points"] / denom * 100).where(denom > 0)
+
+    plays = df["fieldGoalsAttempted"] + 0.44 * df["freeThrowsAttempted"] + df["turnovers"] + df["assists"]
+    df["tov_pct"] = (df["turnovers"] / plays * 100).where(plays > 0)
 
     rest_days_list = []
     rolling7_list = []
@@ -68,12 +82,8 @@ def load_game_log(season: str = SEASON) -> pd.DataFrame:
         else ("Rested (1+ days)" if pd.notna(r) else None)
     )
 
-    grouped = df.groupby("personId")["ts_pct"]
-    player_mean = grouped.transform("mean")
-    player_std = grouped.transform(lambda s: s.std(ddof=1))
-    player_n = grouped.transform("count")
-    df["z_ts"] = (df["ts_pct"] - player_mean) / player_std
-    df.loc[(player_n < 2) | (player_std == 0), "z_ts"] = None
+    df["z_ts"] = _zscore_per_player(df, "ts_pct")
+    df["z_tov"] = _zscore_per_player(df, "tov_pct")
 
     return df
 
