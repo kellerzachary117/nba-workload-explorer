@@ -147,3 +147,41 @@ st.caption(
     "playing-time-based proxies, rest and recent workload don't show up in "
     "shot quality or ball security."
 )
+
+st.subheader("What about foul rate?")
+st.markdown(
+    """
+Same test again, this time on **personal fouls per 36 minutes** (not raw
+fouls per game, which mostly just tracks minutes played — the same confound
+corrected for elsewhere). Each player's fouls-per-36 is z-scored against
+their own season baseline and tested independently per season.
+
+Unlike TS% and turnover rate, this one clears conventional statistical
+significance (p < 0.05) in **all three seasons**.
+"""
+)
+
+st.table(
+    {
+        "Season": ["2023-24", "2024-25", "2025-26"],
+        "r (rest vs z-fouls/36)": ["+0.0082", "+0.0077", "+0.0185"],
+        "r (workload vs z-fouls/36)": ["-0.0267", "-0.0249", "-0.0327"],
+        "High-load+low-rest vs. rest, p-value": ["0.032", "0.004", "0.002"],
+    }
+)
+
+st.warning(
+    "**Read this one carefully.** \"Statistically significant\" isn't the same "
+    "as \"meaningful.\" The effect size (R² ≈ 0.001 in every season — the "
+    "high-load/low-rest group differs from everyone else by roughly 0.03-0.04 "
+    "standard deviations) is tiny; with ~20,000 rows per season, even a "
+    "practically negligible effect clears p < 0.05. The direction is also "
+    "backwards from a fatigue story — the high-load/low-rest group fouls "
+    "*less* than their own normal, not more. The more plausible explanation "
+    "isn't fatigue at all: a player currently logging heavy recent minutes is "
+    "usually a player the coach has kept on the floor rather than benching for "
+    "foul trouble, so the games feeding into \"high recent workload\" are "
+    "disproportionately games where that player wasn't fouling much. That's a "
+    "rotation/selection effect, not evidence tired players foul less.",
+    icon="⚠️",
+)

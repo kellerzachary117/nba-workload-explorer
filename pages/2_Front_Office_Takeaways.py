@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="Front Office Takeaways", page_icon="🏀", layout="wide")
 
 st.title("🏀 Front Office Takeaways")
-st.caption("Plain-language summary of the rest/workload vs. shooting efficiency and turnover findings")
+st.caption("Plain-language summary of the rest/workload vs. shooting efficiency, turnover, and foul-rate findings")
 
 st.subheader("What this means for a GM")
 st.markdown(
@@ -31,5 +31,19 @@ efficiency and ball security, though — it doesn't tell you anything about whet
 shows up in lateral quickness or defensive effort, which are still worth watching for
 yourself. Use rest and workload for pacing guys and managing injury risk, not for predicting
 who's going to make or miss shots or cough the ball up.
+"""
+)
+
+st.subheader("A note on fouls")
+st.markdown(
+    """
+Foul rate was checked too, and it's the one place this analysis found a statistically
+detectable pattern: heavy-minutes players on short rest foul *less* than their own normal,
+not more. Don't read that as "tired players play more disciplined defense" — the effect is
+too small to matter in practice, and the more likely explanation isn't fatigue at all. A
+player currently getting heavy run is usually one the coach trusts to stay out of foul
+trouble, so the stretch of games that produces "heavy recent workload" is naturally skewed
+toward games where that player wasn't fouling much. It's a rotation pattern, not a fatigue
+signal — not something to game-plan or make a rotation call around.
 """
 )
