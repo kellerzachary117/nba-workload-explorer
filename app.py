@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="NBA Workload & Efficiency Explorer", page_icon="🏀", layout="wide")
 
 st.title("🏀 NBA Workload & Efficiency Explorer")
-st.caption("2023-24 regular season · 354 players with 40+ games · 21,607 player-games")
+st.caption("2023-24 through 2025-26 regular seasons · 40+ games per player-season")
 
 st.markdown(
     """
@@ -90,4 +90,31 @@ st.caption(
     "(simple linear correlation on per-game TS%, 7-day rolling minutes) didn't detect "
     "one. A real effect might require a longer workload window, opponent/matchup "
     "adjustment, or a non-linear model to surface."
+)
+
+st.subheader("Does this hold up in other seasons?")
+st.markdown(
+    """
+The 2023-24 walkthrough above is one season. Re-running the same per-player
+z-scored test independently on 2024-25 and 2025-26 — each season's players,
+games, and baselines kept separate, never pooled together — checks whether
+the null result was a one-season fluke.
+"""
+)
+
+st.table(
+    {
+        "Season": ["2023-24", "2024-25", "2025-26"],
+        "Players (40+ games)": ["354", "352", "367"],
+        "r (rest vs z-TS%)": ["+0.0078", "-0.0011", "-0.0130"],
+        "r (workload vs z-TS%)": ["+0.0040", "+0.0044", "+0.0159"],
+        "High-load+low-rest vs. rest, p-value": ["0.29", "0.58", "0.14"],
+    }
+)
+
+st.caption(
+    "No season shows a statistically significant rest/workload effect on "
+    "per-player z-scored TS% at conventional thresholds (p < 0.05) — the "
+    "null result replicates across all three seasons in this dataset, not "
+    "just 2023-24."
 )
