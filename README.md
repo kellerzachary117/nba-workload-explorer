@@ -1,101 +1,104 @@
-# NBA-Data-2010-2024 🏀
-This repository contains CSV files containing comprehensive NBA data spanning from the year 2010 to 2024, offering valuable insights into player statistics, team performances, game outcomes, and more.
+# 🏀 NBA Workload & Efficiency Explorer
 
+**Live app:** https://nba-workload-explorer-mxycqjgdjlmkgixzznfpvw.streamlit.app/
 
-> [!IMPORTANT]  
-> In the future, I plan to update this dataset twice a year, after the end of the regular season and after the end of the playoffs.
+A Streamlit analytics project testing a common load-management assumption against
+NBA play-by-play data: **does playing heavy recent minutes on short rest hurt a
+player's shooting efficiency?**
 
+## The finding
 
-## Schema of box scores ([play_off_box_scores_2010_2024.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/play_off_box_scores_2010_2024.csv), [regular_season_box_scores_2010_2024_part_1.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/regular_season_box_scores_2010_2024_part_1.csv), [regular_season_box_scores_2010_2024_part_2.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/regular_season_box_scores_2010_2024_part_2.csv), [regular_season_box_scores_2010_2024_part_3.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/regular_season_box_scores_2010_2024_part_3.csv))
+Pooling every qualifying player's games together, recent 7-day workload showed a
+*positive* relationship with True Shooting % — heavier-minutes players shot
+better, not worse. That's backwards for a fatigue effect, which was the signal
+this was supposed to catch.
 
-### Dimensions
-- **season_year**: The year of the basketball season.
-- **game_date**: The date of the game.
-- **gameId**: Unique identifier for the game.
-- **teamId**: Unique identifier for the team.
-- **teamCity**: The city where the team is based.
-- **teamName**: The name of the team.
-- **teamTricode**: A three-letter code representing the team.
-- **teamSlug**: A unique identifier for the team.
-- **personId**: Unique identifier for the person (player).
-- **personName**: The name of the person (player).
-- **position**: The position of the player.
-- **comment**: Any additional comments or notes.
-- **jerseyNum**: The jersey number of the player.
+The reason: raw pooled correlation was confounding **workload with player
+identity**. Sustained heavy minutes mostly identifies starters and high-usage
+regulars, who are already efficient scorers; low-workload games are
+disproportionately bench minutes, which are noisier and less efficient on
+average. The "workload effect" was a player-quality effect in disguise.
 
-### Metrics
-- **minutes**: The number of minutes played by the player.
-- **fieldGoalsMade**: The number of field goals made by the player.
-- **fieldGoalsAttempted**: The number of field goals attempted by the player.
-- **fieldGoalsPercentage**: The shooting percentage for field goals.
-- **threePointersMade**: The number of three-pointers made by the player.
-- **threePointersAttempted**: The number of three-pointers attempted by the player.
-- **threePointersPercentage**: The shooting percentage for three-pointers.
-- **freeThrowsMade**: The number of free throws made by the player.
-- **freeThrowsAttempted**: The number of free throws attempted by the player.
-- **freeThrowsPercentage**: The shooting percentage for free throws.
-- **reboundsOffensive**: The number of offensive rebounds by the player.
-- **reboundsDefensive**: The number of defensive rebounds by the player.
-- **reboundsTotal**: The total number of rebounds by the player.
-- **assists**: The number of assists by the player.
-- **steals**: The number of steals by the player.
-- **blocks**: The number of blocks by the player.
-- **turnovers**: The number of turnovers by the player.
-- **foulsPersonal**: The number of personal fouls committed by the player.
-- **points**: The total number of points scored by the player.
-- **plusMinusPoints**: The plus-minus statistic for the player, indicating the team's score differential when the player is on the court.
+Converting each game's TS% into a **z-score against that player's own season
+mean** (so a star's normal night and a bench player's normal night both read as
+0) removes that confound. Once player identity is controlled for, rest and
+recent workload show **no detectable relationship with shooting efficiency**
+(p = 0.29).
 
-## Schema of game totals ([play_off_totals_2010_2024.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/play_off_totals_2010_2024.csv), [regular_season_totals_2010_2024.csv](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/regular_season_totals_2010_2024.csv))
+| Metric | Raw (pooled) | Per-player z-scored |
+|---|---|---|
+| r (rest vs TS%) | 0.0018 | 0.0078 |
+| r (workload vs TS%) | 0.0403 | 0.0040 |
+| Combined R² | 0.0019 | 0.0001 |
+| High-load + low-rest vs. rest of sample | +1.73 pts, p < 0.0001 | +0.014 sd, p = 0.29 |
 
-### Dimensions
-- **SEASON_YEAR**: The year of the NBA season.
-- **TEAM_ID**: Unique identifier for the team.
-- **TEAM_ABBREVIATION**: Abbreviated name of the team.
-- **TEAM_NAME**: Full name of the team.
-- **GAME_ID**: Unique identifier for the game.
-- **GAME_DATE**: Date of the game.
-- **MATCHUP**: Matchup details indicating the teams involved.
-- **WL**: Outcome of the game (Win or Loss).
+A null result doesn't prove fatigue isn't real — it means this method (linear
+correlation on per-game TS%, 7-day rolling minutes) didn't detect one in the
+2023-24 regular season. A real effect might need a longer workload window,
+opponent/matchup adjustment, or a non-linear model to surface.
 
-### Metrics
-- **MIN**: Total minutes played in the game.
-- **FGM**: Field goals made.
-- **FGA**: Field goals attempted.
-- **FG_PCT**: Field goal percentage.
-- **FG3M**: Three-point field goals made.
-- **FG3A**: Three-point field goals attempted.
-- **FG3_PCT**: Three-point field goal percentage.
-- **FTM**: Free throws made.
-- **FTA**: Free throws attempted.
-- **FT_PCT**: Free throw percentage.
-- **OREB**: Offensive rebounds.
-- **DREB**: Defensive rebounds.
-- **REB**: Total rebounds.
-- **AST**: Assists.
-- **TOV**: Turnovers.
-- **STL**: Steals.
-- **BLK**: Blocks.
-- **BLKA**: Opponent's blocks.
-- **PF**: Personal fouls.
-- **PFD**: Personal fouls drawn.
-- **PTS**: Total points scored.
-- **PLUS_MINUS**: Plus-minus statistic.
-- **GP_RANK**: Rank based on games played.
-- **W_RANK**: Rank based on wins.
-- **L_RANK**: Rank based on losses.
-- **W_PCT_RANK**: Rank based on win percentage.
-- **MIN_RANK**: Rank based on minutes played.
-- **Ranks for various statistical categories like field goals made, rebounds, assists, etc., indicated by suffix _RANK.**
-- **AVAILABLE_FLAG**: Indicates if the data for this row is available.
+## The app
 
-## Usage
-These tables can be queried to analyze player performance, team statistics, and game trends over different seasons. I personally upload data to Google Cloud BigQuery and analyze it using SQL.
+Three pages, built in Streamlit:
 
+- **Home** — the analysis above: hypothesis, raw vs. corrected results, the
+  confound diagnosis.
+- **Player Lookup** — search any player across the 2023-24 through 2025-26
+  seasons; headshot, season averages, and a TS%-z-score-by-game chart
+  color-coded by rest status (with a small-sample warning for low-minute
+  players).
+- **Front Office Takeaways** — the same finding translated into plain-language
+  implications for a GM (don't use shooting slumps/streaks as a load-management
+  signal) versus a Head Coach/Assistant Coach (don't game-plan around "tired
+  legs" shooting worse on a back-to-back).
 
-## Authors
+## Methodology / how the numbers were produced
 
-- [@NocturneBear](https://github.com/NocturneBear)
+`data_utils.py` is what the live app runs on. The headline stats on the Home
+page were derived by the analysis scripts in [`analysis/`](analysis/), which
+document the exploratory path from a single-player sanity check up through the
+full pooled-vs-z-scored comparison:
 
-## License
+1. `lebron_2023_24_workload.py` — single-player sanity check of the rest/TS%
+   pipeline.
+2. `all_players_2023_24_rest_vs_ts.py` — pooled rest-days-vs-TS% correlation
+   across all qualifying players (40+ games).
+3. `rest_load_vs_ts.py` — adds rolling 7-day workload as a second variable;
+   surfaces the backwards-looking workload correlation.
+4. `rest_load_vs_ts_zscore.py` — per-player z-score normalization; the version
+   whose output is quoted in the app and this README.
 
-[MIT](https://github.com/NocturneBear/NBA-Data-2010-2024/blob/main/LICENSE)
+True Shooting % is computed as `points / (2 * (FGA + 0.44 * FTA)) * 100`.
+Rest days and rolling 7-day minutes are computed per player from their own
+game log, not league-wide.
+
+## Data source
+
+Box score and totals CSVs (2010-2024) are from
+[NocturneBear/NBA-Data-2010-2024](https://github.com/NocturneBear/NBA-Data-2010-2024).
+2024-25 and 2025-26 season data was pulled directly from `stats.nba.com` via
+[`nba_api`](https://github.com/swar/nba_api) using `fetch_2025_26_box_scores.py`,
+matching the same schema.
+
+## Running locally
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Requires the CSV data files in the repo root (already included). Python 3.12
+is pinned via `runtime.txt` — Streamlit Cloud's default Python 3.14 has an
+`altair` compatibility issue as of this writing.
+
+## Tech stack
+
+Python, Streamlit, pandas, Altair, [`nba_api`](https://github.com/swar/nba_api).
+
+## Why this project
+
+Built as a portfolio piece for an Analytics Intern application — the point
+isn't the Streamlit app itself, it's the analysis underneath it: catching a
+Simpson's-paradox-style confound in a plausible-looking correlation before
+trusting it, and being honest about a null result instead of reaching for a
+model that would manufacture a signal that isn't there.
